@@ -1,0 +1,27 @@
+steps:
+# Step 1: Build Docker image from the Dockerfile in the repo
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '-t', 'us-central1-docker.pkg.dev/crucial-binder-447418-k1/flask-repo/melda-app:latest', '.']
+
+# Step 2: Push the image to Artifact Registry
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'us-central1-docker.pkg.dev/crucial-binder-447418-k1/flask-repo/melda-app:latest']
+
+# Step 3: Deploy to Cloud Run
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  entrypoint: gcloud
+  args:
+    [
+      'run', 'deploy', 'melda-flask-gcp',
+      '--image=us-central1-docker.pkg.dev/crucial-binder-447418-k1/flask-repo/melda-app:latest',
+      '--region=us-central1',
+      '--platform=managed',
+      '--allow-unauthenticated',
+      '--ingress=all',
+      '--port=5000'
+      # Optional: Add VPC connector if required
+      # '--vpc-connector=YOUR_VPC_CONNECTOR_NAME'
+    ]
+
+images:
+- 'us-central1-docker.pkg.dev/crucial-binder-447418-k1/flask-repo/melda-app:latest'
